@@ -272,7 +272,7 @@ h1, h2, h3 {
 
 /* --- PRINT STYLES --- */
 @media print {
-    @page { size: Landscape A4; margin: 1cm; }
+    @page { size: A4 landscape; margin: 1cm; }
 
     body {
         background-color: white !important;
@@ -349,4 +349,5 @@ h1, h2, h3 {
 /* Sembunyikan saat print */
 @media print {
     .note { display: none !important; }
+
 }

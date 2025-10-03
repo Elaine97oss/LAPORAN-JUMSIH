@@ -81,3 +81,73 @@ document.addEventListener('DOMContentLoaded', (event) => {
 function printReport() {
     window.print();
 }
+// Fungsi untuk resize image sebelum ditampilkan
+function resizeImage(file, maxWidth, maxHeight, callback) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+            let width = img.width;
+            let height = img.height;
+
+            // Hitung rasio resize
+            if (width > height) {
+                if (width > maxWidth) {
+                    height *= maxWidth / width;
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width *= maxHeight / height;
+                    height = maxHeight;
+                }
+            }
+
+            // Render ke canvas
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Kembalikan dalam bentuk base64
+            callback(canvas.toDataURL("image/jpeg", 0.5)); // 0.5 = quality
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+// Update di setupImageUpload
+function setupImageUpload(inputId, imgId) {
+    const input = document.getElementById(inputId);
+    const img = document.getElementById(imgId);
+    const label = document.querySelector(`[for="${inputId}"]`);
+    const box = document.getElementById(inputId).parentElement; 
+
+    // Tombol hapus
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = "✖";
+    deleteBtn.classList.add("delete-btn");
+    deleteBtn.style.display = "none";
+    box.appendChild(deleteBtn);
+
+    input.addEventListener('change', function(event) {
+        if (event.target.files && event.target.files[0]) {
+            resizeImage(event.target.files[0], 1280, 720, function(resizedDataUrl) {
+                img.src = resizedDataUrl;
+                img.style.display = 'block';
+                if (label) label.style.display = 'none';
+                deleteBtn.style.display = 'block';
+            });
+        }
+    });
+
+    deleteBtn.addEventListener('click', function() {
+        img.src = "";
+        img.style.display = "none";
+        input.value = ""; 
+        if (label) label.style.display = 'flex';
+        deleteBtn.style.display = "none";
+    });
+}
